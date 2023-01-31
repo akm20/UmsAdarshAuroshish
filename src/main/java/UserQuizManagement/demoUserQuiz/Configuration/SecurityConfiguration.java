@@ -1,36 +1,49 @@
 package UserQuizManagement.demoUserQuiz.Configuration;
 
+import UserQuizManagement.demoUserQuiz.JWTAuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 //@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
+
+    @Autowired
+    private JWTAuthFilter jwtAuthFilter;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .antMatchers("/users").hasAnyAuthority("ADMIN")
-                .antMatchers("/users/**").hasAnyAuthority("USER")
-                .antMatchers("/users/**").hasAnyAuthority("ADMIN")
-                .antMatchers("/users/**").hasAnyAuthority("ADMIN")
-                .antMatchers("/createusers").permitAll()
+//                .antMatchers("/admin/**").hasAnyAuthority("ADMIN")
+//                .antMatchers("/users/**").hasAnyAuthority("USER")
+                .antMatchers("/createusers","/forgotpassword","/authenticate").permitAll()
+                .antMatchers("/admin/**").hasAnyAuthority("ADMIN")
+                .anyRequest().authenticated()
                 .and()
-                .formLogin()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//                .formLogin()
+//                .and()
                 //logout
-                .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login");
+//                .logout()
+//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+//                .logoutSuccessUrl("/login");
 
         return httpSecurity.build();
     }
@@ -50,5 +63,9 @@ public class SecurityConfiguration {
         daoAuthenticationProvider.setUserDetailsService(userDetailsService());
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         return daoAuthenticationProvider;
+    }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

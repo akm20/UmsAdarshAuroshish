@@ -1,6 +1,7 @@
 package UserQuizManagement.demoUserQuiz.Service;
 
 import UserQuizManagement.demoUserQuiz.CustomException;
+import UserQuizManagement.demoUserQuiz.DTO.ForgotPasswordDto;
 import UserQuizManagement.demoUserQuiz.Entity.Roles;
 import UserQuizManagement.demoUserQuiz.Entity.Users;
 import UserQuizManagement.demoUserQuiz.Repository.UserRepository;
@@ -94,18 +95,18 @@ public class UserService
 //    }
 
 
-    public Users forgotPassword(Users users) throws CustomException {
-        Optional<Users> usersOptional = userRepository.findByUserEmail(users.getUserEmail());
+    public Users forgotPassword(ForgotPasswordDto forgotPasswordDto) throws CustomException {
+        Optional<Users> usersOptional = userRepository.findByUserEmail(forgotPasswordDto.getUserEmail());
         if (!usersOptional.isPresent()){
             throw new CustomException("User not registered");
         }
         String question = usersOptional.get().getQuestion();
         String answer = usersOptional.get().getAnswer();
-        if (!answer.equals(users.getAnswer())
-                || !usersOptional.get().getUserEmail().equals(users.getUserEmail())) {
+        if (!answer.equals(forgotPasswordDto.getAnswer())
+                || !usersOptional.get().getUserEmail().equals(forgotPasswordDto.getUserEmail())) {
             throw new CustomException("The security answer or email or security question does not matches");
         }
-        usersOptional.get().setUserPassword(passwordEncoder.encode(users.getUserPassword()));
+        usersOptional.get().setUserPassword(passwordEncoder.encode(forgotPasswordDto.getNewPassword()));
 
         Users users1= userRepository.save(usersOptional.get());
         return users1;
