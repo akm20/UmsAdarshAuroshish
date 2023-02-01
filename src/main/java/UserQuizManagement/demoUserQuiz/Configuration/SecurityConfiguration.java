@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 //@EnableMethodSecurity(prePostEnabled = true)
@@ -29,21 +30,23 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
 //                .antMatchers("/admin/**").hasAnyAuthority("ADMIN")
 //                .antMatchers("/users/**").hasAnyAuthority("USER")
-                .antMatchers("/createusers","/forgotpassword","/authenticate").permitAll()
+                .antMatchers("/createusers").permitAll()
+                .antMatchers("/authenticate").permitAll()
+                .antMatchers("/forgotpassword").permitAll()
                 .antMatchers("/admin/**").hasAnyAuthority("ADMIN")
                 .anyRequest().authenticated()
+                .and()
+                .formLogin()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//                .formLogin()
-//                .and()
-                //logout
-//                .logout()
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                .logoutSuccessUrl("/login");
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+//                //logout
+                .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .logoutSuccessUrl("/login");
 
         return httpSecurity.build();
     }

@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoder;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +21,7 @@ import java.util.function.Function;
 public class JWTService {
 
     private static final String SECRET="2D4B6150645367566B59703373367639792442264528482B4D6251655468576D";
-
-
-//    public String extractUserEmail(String token){
-//
-//    }
+    
 public String extractUserEmail(String token) {
     return extractClaim(token, Claims::getSubject);
 }
@@ -66,7 +63,7 @@ public String extractUserEmail(String token) {
                 .setClaims(claims)
                 .setSubject(userEmail)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+1000*60*30))
+                .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60*3))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 

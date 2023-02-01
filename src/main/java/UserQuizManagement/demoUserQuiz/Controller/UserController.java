@@ -1,4 +1,5 @@
 package UserQuizManagement.demoUserQuiz.Controller;
+import java.security.Principal;
 
 import UserQuizManagement.demoUserQuiz.CustomException;
 import UserQuizManagement.demoUserQuiz.DTO.AuthRequest;
@@ -8,6 +9,7 @@ import UserQuizManagement.demoUserQuiz.Service.JWTService;
 import UserQuizManagement.demoUserQuiz.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,14 +29,21 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+//    @PreAuthorize()
     @GetMapping("/admin/allusers")
     public List<Users> getAllUser(){
         return userService.getUsers();
     }
 
     @GetMapping("/users/{userId}")
-    public Users getUserById(@PathVariable(value = "userId") Long user_id ) throws CustomException {
-        return userService.getUserById(user_id);
+    public Users getUserById(@PathVariable(value = "userId") Long userId,Principal principal) throws CustomException {
+        Users users = userService.getUserById(userId);
+        if(principal.getName().equals(users.getUserEmail())) {
+            return userService.getUserById(userId);
+        }
+        else{
+            throw new CustomException("you are not authorised to view this detail");
+        }
     }
 
 //    @PostMapping("/users/login")
@@ -42,6 +51,15 @@ public class UserController {
 //        Users loginUser = userService.loginUser(user);
 //        return  ResponseEntity.ok(loginUser);
 //    }
+//   @PostMapping("/users/login")
+//    public String userAuthenticate(@RequestBody AuthRequest authRequest){
+//    Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUserEmail(),authRequest.getUserPassword()));;
+//    if (authentication.isAuthenticated()) {
+//        return jwtService.generateToken(authRequest.getUserEmail());
+//    } else {
+//        throw new UsernameNotFoundException("Invalid User Request");
+//    }
+//}
 
 //    @PostMapping("/admin/login")
 //    public ResponseEntity<Users> adminUser(@RequestBody Users user) throws Exception {
@@ -66,9 +84,16 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}")
-    public ResponseEntity<Users> updateUser(@RequestBody Users user ) throws CustomException {
-        Users updatedUser = userService.updateUser(user);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<Users> updateUser(@RequestBody Users user,Principal principal ) throws CustomException {
+        Users users = userService.getUserById(user.getUserId());
+        if(principal.getName().equals(users.getUserEmail())) {
+            Users updatedUser = userService.updateUser(user);
+            return ResponseEntity.ok(updatedUser);
+        }
+        else{
+            throw new CustomException("you are not authorised to view this detail");
+        }
+
     }
 
     @DeleteMapping("admin/deleteusers/{userId}")

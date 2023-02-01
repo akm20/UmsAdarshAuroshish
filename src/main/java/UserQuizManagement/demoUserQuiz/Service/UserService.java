@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.util.*;
 
 
@@ -39,7 +40,6 @@ public class UserService
         Optional<Users> userOptional = userRepository.findById(userId);
         if(!userOptional.isPresent()){
             throw new CustomException("ID not found");
-
         }
         return userOptional.get();
     }
@@ -70,15 +70,15 @@ public class UserService
         return userRepository.save(user);
     }
 
-//    public Users loginUser(Users users) throws CustomException {
-//        Optional<Users> usersOptional = userRepository.findByUserEmail(users.getUserEmail());
-//        String password= users.getUserPassword();
+    public Users loginUser(Users users) throws CustomException {
+        Optional<Users> usersOptional = userRepository.findByUserEmail(users.getUserEmail());
+        String password= users.getUserPassword();
 //        String encodedPwd=encodeToBase64(password);
-//        if ((usersOptional.get().getUserPassword()).equals(encodedPwd)){
-//            return usersOptional.get();
-//        }
-//        else throw  new CustomException("Password does not match");
-//    }
+        if ((usersOptional.get().getUserPassword()).equals(passwordEncoder.encode(password))){
+            return usersOptional.get();
+        }
+        else throw  new CustomException("Password does not match");
+    }
 
 //    public Users adminUser(Users users) throws CustomException {
 //        Optional<Users> usersOptional = userRepository.findByUserEmail(users.getUserEmail());
@@ -111,10 +111,6 @@ public class UserService
         Users users1= userRepository.save(usersOptional.get());
         return users1;
     }
-
-
-
-
 
     public Users updateUser(Users user) throws CustomException{
         Optional<Users> userOptional = userRepository.findById(user.getUserId());
