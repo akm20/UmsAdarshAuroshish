@@ -83,7 +83,7 @@ public class UserController {
         return userService.createNewAdmin(user);
     }
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/updateusers")
     public ResponseEntity<Users> updateUser(@RequestBody Users user,Principal principal ) throws CustomException {
         Users users = userService.getUserById(user.getUserId());
         if(principal.getName().equals(users.getUserEmail())) {

@@ -114,11 +114,10 @@ public class UserService
 
     public Users updateUser(Users user) throws CustomException{
         Optional<Users> userOptional = userRepository.findById(user.getUserId());
+        if(userRepository.existsByUserEmail(user.getUserEmail())) throw new CustomException("This email already exits try a new email.");
         if(!userOptional.isPresent()){
-            //throw new CustomException();
             throw new CustomException("No such id exists");
         }
-//        Optional<User1> user1Optional = userRepository.findById(user1.getId());
         if(user.getUserName() != null) {
             userOptional.get().setUserName(user.getUserName());
         }

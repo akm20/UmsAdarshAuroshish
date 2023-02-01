@@ -63,7 +63,7 @@ public String extractUserEmail(String token) {
                 .setClaims(claims)
                 .setSubject(userEmail)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60*3))
+                .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60 * 10))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
